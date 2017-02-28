@@ -1,70 +1,39 @@
 defmodule Ueberauth.Strategy.FreeAgent do
   @moduledoc """
-  Provides an Ueberauth strategy for authenticating with FreeAgent.
+  FreeAgent OAuth2 strategy for Überauth.
 
-  ### Setup
+  ## Configuration
 
-  Create an application in freeagent for you to use.
+  Add `freeagent` to your Überauth configuration:
 
-  Register a new application at: [your freeagent developer page](https://dev.freeagent.com/) and
-  get the `OAuth identifier` (the `client_id`) and `OAuth secret` (the `client_secret`).
+  ```elixir
+  config :ueberauth, Ueberauth,
+    providers: [
+      freeagent: {Ueberauth.Strategy.FreeAgent, []}
+    ]
+  ```
 
-  Include the provider in your configuration for Ueberauth:
+  Update your provider configuration, setting your `client_id` and `client_secret`:
 
-      config :ueberauth, Ueberauth,
-        providers: [
-          freeagent: {Ueberauth.Strategy.FreeAgent, []}
-        ]
+  ```elixir
+  config :ueberauth, Ueberauth.Strategy.FreeAgent.OAuth,
+    client_id: System.get_env("FREEAGENT_CLIENT_ID"),
+    client_secret: System.get_env("FREEAGENT_CLIENT_SECRET")
+  ```
 
-  Then include the configuration for FreeAgent OAuth:
+  **IMPORTANT**: To use the FreeAgent sandbox API, set `sandbox` to `true` for the `:ueberauth_freeagent` application:
 
-      config :ueberauth, Ueberauth.Strategy.FreeAgent.OAuth,
-        client_id: System.get_env("FREEAGENT_CLIENT_ID"),
-        client_secret: System.get_env("FREEAGENT_CLIENT_SECRET")
+  ```elixir
+  config :ueberauth_freeagent,
+    sandbox: true
+  ```
 
-  **IMPORTANT**: To use the FreeAgent sandbox API, set `sandbox` to `true` for the
-  `:ueberauth_freeagent` application:
+  This will automatically configure the correct URLs.
 
-      config :ueberauth_freeagent,
-        sandbox: true
+  ## OAuth2 Flow
 
-  If you haven't already, create a pipeline and setup routes for your callback handler
+  For information on how to configure Phoenix to use this strategy, see the [README](./extra-readme.html)
 
-      pipeline :auth do
-        Ueberauth.plug "/auth"
-      end
-
-      scope "/auth" do
-        pipe_through [:browser, :auth]
-
-        get "/:provider/callback", AuthController, :callback
-      end
-
-
-  Create an endpoint for the callback where you will handle the `Ueberauth.Auth` struct
-
-      defmodule MyApp.AuthController do
-        use MyApp.Web, :controller
-
-        def callback_phase(%{assigns: %{ueberauth_failure: fails}} = conn, _params) do
-          # do things with the failure
-        end
-
-        def callback_phase(%{assigns: %{ueberauth_auth: auth}} = conn, params) do
-          # do things with the auth
-        end
-      end
-
-  You can edit the behaviour of the Strategy by including some options when you register your provider.
-
-  To set the `uid_field`
-
-      config :ueberauth, Ueberauth,
-        providers: [
-          freeagent: { Ueberauth.Strategy.FreeAgent, [uid_field: :something_els] }
-        ]
-
-  Default is `:email`
   """
   use Ueberauth.Strategy, uid_field: :email,
                           oauth2_module: Ueberauth.Strategy.FreeAgent.OAuth
@@ -174,6 +143,7 @@ defmodule Ueberauth.Strategy.FreeAgent do
     }
   end
 
+  @spec fetch_user(conn :: Plug.Conn.t, token :: binary) :: Plug.Conn.t
   defp fetch_user(conn, token) do
     conn = put_private(conn, :freeagent_token, token)
 
@@ -192,11 +162,15 @@ defmodule Ueberauth.Strategy.FreeAgent do
     end
   end
 
+  # Attempt to retrieve the user profile
+  @spec profile(token :: binary) :: {:ok, OAuth2.Response.t} | {:error, OAuth2.Error.t}
   defp profile(token) do
     Ueberauth.Strategy.FreeAgent.OAuth.client(token: token)
     |> OAuth2.Client.get("/users/me")
   end
 
+  # Extract an option from the connection
+  @spec option(conn :: Plug.Conn.t, key :: atom) :: any
   defp option(conn, key) do
     Keyword.get(options(conn), key, Keyword.get(default_options(), key))
   end

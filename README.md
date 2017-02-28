@@ -52,23 +52,32 @@ This will automatically configure the correct URLs.
 
 ## OAuth2 Flow
 
-Create a controller to implement callbacks to deal with `Ueberauth.Auth` and `Ueberauth.Failure` responses. For an example implementation see the [Überauth Example](https://freeagent.com/ueberauth/ueberauth_example) application.
+Create a controller to implement callbacks to deal with `Ueberauth.Auth` and
+`Ueberauth.Failure` responses. For an example implementation see the [Überauth
+Example](https://freeagent.com/ueberauth/ueberauth_example) application.
 
-Make sure you include the Überauth plug in your router (or your controller):
+Make sure you include the Überauth plug in your router:
 
 ```elixir
-pipeline :browser do
+pipeline :auth do
   plug Ueberauth
-  ...
-  end
 end
 ```
 
-Make sure you have the request and callback routes if you haven't already:
+Configure the request and callback routes, making sure to use pipeline:
 
 ```elixir
 scope "/auth", MyApp do
-  pipe_through :browser
+  pipe_through [:auth, :browser]
+
+  get "/:provider", AuthController, :request
+  get "/:provider/callback", AuthController, :callback
+end
+```
+
+```elixir
+scope "/auth", MyApp do
+  pipe_through [:auth, :browser]
 
   get "/:provider", AuthController, :request
   get "/:provider/callback", AuthController, :callback
