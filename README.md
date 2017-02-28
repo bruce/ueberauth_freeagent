@@ -64,7 +64,8 @@ pipeline :auth do
 end
 ```
 
-Configure the request and callback routes, making sure to use pipeline:
+Configure the request and callback routes, making sure to use the pipeline that
+includes the plug:
 
 ```elixir
 scope "/auth", MyApp do
