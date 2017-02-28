@@ -75,15 +75,6 @@ scope "/auth", MyApp do
 end
 ```
 
-```elixir
-scope "/auth", MyApp do
-  pipe_through [:auth, :browser]
-
-  get "/:provider", AuthController, :request
-  get "/:provider/callback", AuthController, :callback
-end
-```
-
 ### Calling
 
 Depending on the configured url you can initial the request through:
