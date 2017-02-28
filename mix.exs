@@ -1,7 +1,7 @@
 defmodule Ueberauth.FreeAgent.Mixfile do
   use Mix.Project
 
-  @version "0.1.0"
+  @version "0.1.1"
 
   def project do
     [app: :ueberauth_freeagent,
@@ -45,9 +45,15 @@ defmodule Ueberauth.FreeAgent.Mixfile do
   end
 
   defp package do
-    [files: ["lib", "mix.exs", "README.md", "LICENSE"],
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
       maintainers: ["Bruce Williams"],
       licenses: ["MIT"],
-      links: %{"freeagent": "https://github.com/bruce/ueberauth_freeagent"}]
+      links: %{
+        "FreeAgent" => "https://freeagent.com",
+        "FreeAgent Developer Site" => "https://dev.freeagent.com",
+        "Source" => "https://github.com/bruce/ueberauth_freeagent",
+      }
+    ]
   end
 end
