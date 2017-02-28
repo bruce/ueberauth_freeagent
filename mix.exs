@@ -41,7 +41,7 @@ defmodule Ueberauth.FreeAgent.Mixfile do
   end
 
   defp description do
-    "An Ueberauth strategy for using FreeAgent to authenticate your users."
+    "An Ueberauth strategy to use FreeAgent for authentication."
   end
 
   defp package do
